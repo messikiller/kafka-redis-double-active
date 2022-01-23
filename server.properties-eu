@@ -1,0 +1,10 @@
+# zookeeper.connect=zookeeper-eu:2182
+# log.dirs=/bitnami/kafka/data
+# advertised.listeners=PLAINTEXT://:9093
+# auto.create.topics.enable=true
+# broker.id=-1
+# listeners=PLAINTEXT://:9093
+# max.partition.fetch.bytes=1048576
+# max.request.size=1048576
+# sasl.enabled.mechanisms=PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+# sasl.mechanism.inter.broker.protocol=
