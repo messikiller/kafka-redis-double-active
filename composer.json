@@ -1,0 +1,7 @@
+{
+    "name": "hqm/kafka-redis-double-active",
+    "require": {
+        "nmred/kafka-php": "0.2.*",
+        "monolog/monolog": "^2.3"
+    }
+}
