@@ -1,5 +1,7 @@
 ###
 # image docs: https://github.com/bitnami/bitnami-docker-kafka
+# kafka UI: https://github.com/provectus/kafka-ui
+# 
 # 
 # consumer:
 #     kafka-console-consumer.sh --bootstrap-server kafka-us:9092 --topic test --from-beginning
@@ -23,12 +25,12 @@ services:
   kafka-us:
     image: docker.io/bitnami/kafka:3
     ports:
-      - "9192:9092"
-    # volumes:
-      # - "./config-us:/bitnami/kafka/config"
+      - "9092:9092"
+      - "9192:9192"
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-us:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=kafka-us
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
       - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9192
       - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka-us:9092,EXTERNAL://localhost:9192
@@ -38,32 +40,53 @@ services:
 
   kafka-eu:
     image: docker.io/bitnami/kafka:3
-    # volumes:
-      # - "./config-eu:/bitnami/kafka/config"
+    ports:
+      - "9093:9093"
+      - "9193:9193"
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-eu:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=kafka-eu
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9093,EXTERNAL://:9193
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka-eu:9093,EXTERNAL://localhost:9193
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper-eu
 
-  # producer:
-  #   image: docker.io/bitnami/kafka:3
-  #   environment:
-  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-us:2181
-  #   command: "tail -f /dev/null"
-  #   depends_on:
-  #     - kafka-us
-  #     - kafka-eu
-  
-  consumer:
-    image: docker.io/bitnami/kafka:3
-    environment:
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-us:2181
-    command: "kafka-console-consumer.sh --bootstrap-server kafka-us:9092 --topic test --from-beginning"
+  kafka-ui:
+    image: provectuslabs/kafka-ui
     depends_on:
+      - zookeeper-us
       - kafka-us
+      - zookeeper-eu
       - kafka-eu
-  
-  # busybox:
-  #   image: busybox:latest
-  #   command: "tail -f /dev/null"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=kafka-us
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-us:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper-us:2181
+      - KAFKA_CLUSTERS_1_NAME=kafka-eu
+      - KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS=kafka-eu:9093
+      - KAFKA_CLUSTERS_1_ZOOKEEPER=zookeeper-eu:2181
+    ports:
+      - "9090:8080"
+
+  # kafdrop:
+  #   image: obsidiandynamics/kafdrop
+  #   depends_on:
+  #     - zookeeper-us
+  #     - kafka-us
+  #   environment:
+  #     - KAFKA_BROKERCONNECT=kafka-us:9092
+  #   ports:
+  #     - "9999:9000"
+
+  # kafka-manager-us:
+  #   image: sheepkiller/kafka-manager
+  #   depends_on:
+  #     - zookeeper-us
+  #     - kafka-us
+  #   environment:
+  #     - ZK_HOSTS=zookeeper-us:2181
+  #   ports:
+  #     - "9999:9000"

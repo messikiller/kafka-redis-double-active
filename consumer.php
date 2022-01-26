@@ -11,13 +11,17 @@ $logger->pushHandler(new StreamHandler(fopen('php://stdout', 'w')));
 
 $config = \Kafka\ConsumerConfig::getInstance();
 $config->setMetadataRefreshIntervalMs(10000);
-$config->setMetadataBrokerList('127.0.0.1:9192');
+$config->setMetadataBrokerList('localhost:9192');
 $config->setGroupId('test');
-$config->setBrokerVersion('0.9.0.1');
+// $config->setBrokerVersion('0.9.0.1');
+$config->setBrokerVersion('1.0.0');
 $config->setTopics(array('test'));
-//$config->setOffsetReset('earliest');
+$config->setOffsetReset('earliest');
+// $config->setOffsetReset('latest');
 $consumer = new \Kafka\Consumer();
-$consumer->setLogger($logger);
+// $consumer->setLogger($logger);
 $consumer->start(function($topic, $part, $message) {
-	var_dump($message);
+    echo "\n";
+    var_dump($message);
+    echo "\n";
 });
